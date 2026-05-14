@@ -206,10 +206,9 @@ func newFakeControllerWithResync(data *fakeData, appResyncPeriod time.Duration, 
 	defer cancelProj()
 	cancelApp := test.StartInformer(ctrl.appInformer)
 	defer cancelApp()
-	clusterCacheMock := mocks.ClusterCache{}
-	clusterCacheMock.On("IsNamespaced", mock.Anything).Return(true, nil)
-	clusterCacheMock.On("GetOpenAPISchema").Return(nil, nil)
-	clusterCacheMock.On("GetGVKParser").Return(nil)
+	clusterCacheMock := &mocks.ClusterCache{}
+	clusterCacheMock.EXPECT().IsNamespaced(mock.Anything).Return(true, nil)
+	clusterCacheMock.EXPECT().GetGVKParser().Return(nil)
 
 	mockStateCache := mockstatecache.LiveStateCache{}
 	ctrl.appStateManager.(*appStateManager).liveStateCache = &mockStateCache
