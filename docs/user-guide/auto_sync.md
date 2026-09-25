@@ -18,7 +18,7 @@ spec:
   syncPolicy:
     automated: {}
 ```
-Application CRD now also support explicitly setting automated sync to be turned on or off by using `spec.syncPolicy.automated.enabled` flag to true or false. When `enable` field is set to true, Automated Sync is active and when set to false controller will skip automated sync even if `prune`, `self-heal` and `allowEmpty` are set.
+Application CRD now also support explicitly setting automated sync to be turned on or off by using `spec.syncPolicy.automated.enabled` flag to true or false. When `enable` field is set to true, Automated Sync is active and when set to false controller will skip automated sync even if `selfHeal` and `allowEmpty` are set.
 ```yaml
 spec:
   syncPolicy:
@@ -27,7 +27,7 @@ spec:
 ```
 
 > [!NOTE]
-> Setting the `spec.syncPolicy.automated.enabled` flag to null will be treated as if automated sync is enabled. When the `enabled` field is set to false, fields like `prune`, `selfHeal` and `allowEmpty` can be set without enabling them.
+> Setting the `spec.syncPolicy.automated.enabled` flag to null will be treated as if automated sync is enabled. When the `enabled` field is set to false, fields like `selfHeal` and `allowEmpty` can be set without enabling them.
 
 ## Temporarily toggling auto-sync for applications managed by ApplicationSets
 
@@ -37,23 +37,31 @@ For a standalone application, toggling auto-sync is performed by changing the ap
 
 ## Automatic Pruning
 
-By default (and as a safety mechanism), automated sync will not delete resources when Argo CD detects
-the resource is no longer defined in Git. To prune the resources, a manual sync can always be
-performed (with pruning checked). Pruning can also be enabled to happen automatically as part of the
-automated sync by running:
+By default (and as a safety mechanism), sync will not delete resources when Argo CD detects
+the resource is no longer defined in Git. Pruning can be enabled for both manual and automated
+syncs by setting `spec.syncPolicy.autoPrune`:
 
 ```bash
 argocd app set <APPNAME> --auto-prune
 ```
 
-Or by setting the prune option to true in the automated sync policy:
+Or declaratively:
 
 ```yaml
 spec:
   syncPolicy:
-    automated:
-      prune: true
+    autoPrune: true
 ```
+
+When `autoPrune` is `true`, a sync request that does not explicitly set `prune` will prune
+resources. An explicit prune value on the sync request (UI checkbox, CLI `--prune` /
+`--prune=false`) always takes precedence. For automated syncs, the controller uses
+`autoPrune` when initiating the sync operation.
+
+> [!NOTE]
+> `spec.syncPolicy.automated.prune` is **deprecated**. It is still honored for backwards
+> compatibility and takes precedence over `autoPrune` when explicitly set. Prefer
+> `syncPolicy.autoPrune` for new configuration.
 
 ## Automatic Pruning with Allow-Empty (v1.8)
 
@@ -69,8 +77,8 @@ Or by setting the allow empty option to true in the automated sync policy:
 ```yaml
 spec:
   syncPolicy:
+    autoPrune: true
     automated:
-      prune: true
       allowEmpty: true
 ```
 

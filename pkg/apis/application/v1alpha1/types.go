@@ -1528,6 +1528,11 @@ type SyncPolicy struct {
 	Automated *SyncPolicyAutomated `json:"automated,omitempty" protobuf:"bytes,1,opt,name=automated"`
 	// Options allow you to specify whole app sync-options
 	SyncOptions SyncOptions `json:"syncOptions,omitempty" protobuf:"bytes,2,opt,name=syncOptions"`
+	// AutoPrune specifies whether to delete resources from the cluster that are not found in the
+	// sources anymore during sync. Applies to both manual and automated syncs default is false.
+	// Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is
+	// explicitly set, it still takes precedence for backwards compatibility.
+	AutoPrune *bool `json:"autoPrune,omitempty" protobuf:"bytes,5,opt,name=autoPrune"`
 	// Retry controls failed sync retry behavior
 	Retry *RetryStrategy `json:"retry,omitempty" protobuf:"bytes,3,opt,name=retry"`
 	// ManagedNamespaceMetadata controls metadata in the given namespace (if CreateNamespace=true)
@@ -1543,9 +1548,25 @@ func (p *SyncPolicy) IsAutomatedSyncEnabled() bool {
 	return false
 }
 
+// GetAutoPrune returns whether pruning is enabled for syncs (manual and automated).
+// Precedence: if the deprecated syncPolicy.automated.prune is explicitly set, it takes
+// priority. Otherwise syncPolicy.autoPrune is used. Default is false.
+func (p *SyncPolicy) GetAutoPrune() bool {
+	if p == nil {
+		return false
+	}
+	if p.Automated != nil && p.Automated.Prune != nil {
+		return *p.Automated.Prune
+	}
+	if p.AutoPrune != nil {
+		return *p.AutoPrune
+	}
+	return false
+}
+
 // IsZero returns true if the sync policy is empty
 func (p *SyncPolicy) IsZero() bool {
-	return p == nil || (p.Automated == nil && len(p.SyncOptions) == 0 && p.Retry == nil && p.ManagedNamespaceMetadata == nil)
+	return p == nil || (p.Automated == nil && p.AutoPrune == nil && len(p.SyncOptions) == 0 && p.Retry == nil && p.ManagedNamespaceMetadata == nil)
 }
 
 // RetryStrategy contains information about the strategy to apply when a sync failed
@@ -1614,7 +1635,9 @@ type Backoff struct {
 
 // SyncPolicyAutomated controls the behavior of an automated sync
 type SyncPolicyAutomated struct {
-	// Prune specifies whether to delete resources from the cluster that are not found in the sources anymore as part of automated sync (default: false)
+	// Deprecated: use syncPolicy.autoPrune instead. Prune specifies whether to delete resources
+	// from the cluster that are not found in the sources anymore as part of automated sync
+	// (default: false). When explicitly set, this field takes precedence over syncPolicy.autoPrune.
 	Prune *bool `json:"prune,omitempty" protobuf:"bytes,1,opt,name=prune"`
 	// SelfHeal specifies whether to revert resources back to their desired state upon modification in the cluster (default: false)
 	SelfHeal *bool `json:"selfHeal,omitempty" protobuf:"bytes,2,opt,name=selfHeal"`
@@ -1624,7 +1647,8 @@ type SyncPolicyAutomated struct {
 	Enabled *bool `json:"enabled,omitempty" protobuf:"bytes,4,opt,name=enabled"`
 }
 
-// GetPrune returns the value of Prune, defaulting to false if nil.
+// GetPrune returns the value of the deprecated Prune field, defaulting to false if nil.
+// Prefer SyncPolicy.GetAutoPrune which also considers syncPolicy.autoPrune.
 func (a *SyncPolicyAutomated) GetPrune() bool {
 	if a == nil || a.Prune == nil {
 		return false

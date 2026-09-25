@@ -710,11 +710,14 @@ func printAppSummaryTable(app *argoappv1.Application, appURL string, windows *ar
 	var syncPolicy string
 	if app.Spec.SyncPolicy != nil && app.Spec.SyncPolicy.IsAutomatedSyncEnabled() {
 		syncPolicy = "Automated"
-		if app.Spec.SyncPolicy.Automated.GetPrune() {
+		if app.Spec.SyncPolicy.GetAutoPrune() {
 			syncPolicy += " (Prune)"
 		}
 	} else {
 		syncPolicy = "Manual"
+		if app.Spec.SyncPolicy.GetAutoPrune() {
+			syncPolicy += " (Prune)"
+		}
 	}
 	fmt.Printf(printOpFmtStr, "Sync Policy:", syncPolicy)
 	syncStatusStr := string(app.Status.Sync.Status)
@@ -1481,10 +1484,13 @@ func NewApplicationListCommand(clientOpts *argocdclient.ClientOptions) *cobra.Co
 
 func formatSyncPolicy(app argoappv1.Application) string {
 	if app.Spec.SyncPolicy == nil || !app.Spec.SyncPolicy.IsAutomatedSyncEnabled() {
+		if app.Spec.SyncPolicy.GetAutoPrune() {
+			return "Manual-Prune"
+		}
 		return "Manual"
 	}
 	policy := "Auto"
-	if app.Spec.SyncPolicy.Automated.GetPrune() {
+	if app.Spec.SyncPolicy.GetAutoPrune() {
 		policy = policy + "-Prune"
 	}
 	return policy
@@ -1983,12 +1989,16 @@ func NewApplicationSyncCommand(clientOpts *argocdclient.ClientOptions) *cobra.Co
 					DryRun:          &dryRun,
 					Revision:        &revision,
 					Resources:       filteredResources,
-					Prune:           &prune,
 					Manifests:       localObjsStrings,
 					Infos:           getInfos(infos),
 					SyncOptions:     syncOptionsFactory(),
 					Revisions:       revisions,
 					SourcePositions: sourcePositions,
+				}
+				// Only set prune when the flag is explicitly provided. Leaving it nil
+				// lets the API server apply syncPolicy.autoPrune as the default.
+				if c.Flags().Changed("prune") {
+					syncReq.Prune = &prune
 				}
 
 				switch strategy {
@@ -2061,7 +2071,7 @@ func NewApplicationSyncCommand(clientOpts *argocdclient.ClientOptions) *cobra.Co
 		}),
 	}
 	command.Flags().BoolVar(&dryRun, "dry-run", false, "Preview apply without affecting cluster")
-	command.Flags().BoolVar(&prune, "prune", false, "Allow deleting unexpected resources")
+	command.Flags().BoolVar(&prune, "prune", false, "Allow deleting unexpected resources. If omitted, syncPolicy.autoPrune is used when set")
 	command.Flags().StringVar(&revision, "revision", "", "Sync to a specific revision. Preserves parameter overrides")
 	command.Flags().StringArrayVar(&resources, "resource", []string{}, fmt.Sprintf("Sync only specific resources as GROUP%[1]sKIND%[1]sNAME or %[2]sGROUP%[1]sKIND%[1]sNAME. Fields may be blank and '*' can be used. This option may be specified repeatedly", resourceFieldDelimiter, resourceExcludeIndicator))
 	command.Flags().StringVarP(&selector, "selector", "l", "", "Sync apps that match this label. Supports '=', '==', '!=', in, notin, exists & not exists. Matching apps must satisfy all of the specified label constraints.")

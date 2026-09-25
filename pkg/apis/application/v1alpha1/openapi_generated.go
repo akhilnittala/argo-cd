@@ -8171,6 +8171,13 @@ func schema_pkg_apis_application_v1alpha1_SyncPolicy(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1.ManagedNamespaceMetadata"),
 						},
 					},
+					"autoPrune": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs default is false. Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
@@ -8188,7 +8195,7 @@ func schema_pkg_apis_application_v1alpha1_SyncPolicyAutomated(ref common.Referen
 				Properties: map[string]spec.Schema{
 					"prune": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Prune specifies whether to delete resources from the cluster that are not found in the sources anymore as part of automated sync (default: false)",
+							Description: "Deprecated: use syncPolicy.autoPrune instead. Prune specifies whether to delete resources from the cluster that are not found in the sources anymore as part of automated sync (default: false). When explicitly set, this field takes precedence over syncPolicy.autoPrune.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},

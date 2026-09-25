@@ -4930,6 +4930,11 @@ func (in *SyncPolicy) DeepCopyInto(out *SyncPolicy) {
 		*out = make(SyncOptions, len(*in))
 		copy(*out, *in)
 	}
+	if in.AutoPrune != nil {
+		in, out := &in.AutoPrune, &out.AutoPrune
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Retry != nil {
 		in, out := &in.Retry, &out.Retry
 		*out = new(RetryStrategy)

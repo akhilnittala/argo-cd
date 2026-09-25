@@ -57,7 +57,7 @@ const AutoSyncFormField = ReactFormField((props: {fieldApi: FieldApi; className:
                 value={automated ? auto : manual}
                 options={[manual, auto]}
                 onChange={opt => {
-                    setValue(opt.value === auto ? {prune: false, selfHeal: false, enabled: true} : null);
+                    setValue(opt.value === auto ? {selfHeal: false, enabled: true} : null);
                 }}
             />
             {automated && (
@@ -68,11 +68,6 @@ const AutoSyncFormField = ReactFormField((props: {fieldApi: FieldApi; className:
                         <HelpIcon title='If checked, application will automatically sync when changes are detected' />
                     </div>
                     <div className='checkbox-container'>
-                        <Checkbox onChange={val => setValue({...automated, prune: val})} checked={!!automated.prune} id='policyPrune' />
-                        <label htmlFor='policyPrune'>Prune Resources</label>
-                        <HelpIcon title='If checked, Argo will delete resources if they are no longer defined in Git' />
-                    </div>
-                    <div className='checkbox-container'>
                         <Checkbox onChange={val => setValue({...automated, selfHeal: val})} checked={!!automated.selfHeal} id='policySelfHeal' />
                         <label htmlFor='policySelfHeal'>Self Heal</label>
                         <HelpIcon title='If checked, Argo will force the state defined in Git into the cluster when a deviation in the cluster is detected' />
@@ -80,6 +75,24 @@ const AutoSyncFormField = ReactFormField((props: {fieldApi: FieldApi; className:
                 </div>
             )}
         </React.Fragment>
+    );
+});
+
+const AutoPruneFormField = ReactFormField((props: {fieldApi: FieldApi}) => {
+    const {
+        fieldApi: {getValue, setValue}
+    } = props;
+
+    const autoPrune = getValue();
+
+    return (
+        <div className='application-create-panel__sync-params'>
+            <div className='checkbox-container'>
+                <Checkbox onChange={val => setValue(val ? true : undefined)} checked={!!autoPrune} id='policyAutoPrune' />
+                <label htmlFor='policyAutoPrune'>Prune Resources</label>
+                <HelpIcon title='If checked, Argo will delete resources if they are no longer defined in Git during manual and automated syncs' />
+            </div>
+        </div>
     );
 });
 
@@ -345,6 +358,7 @@ export const ApplicationCreatePanel = (props: {
                                                     qeId='application-create-field-sync-policy'
                                                     component={AutoSyncFormField}
                                                 />
+                                                <FormField formApi={api} field='spec.syncPolicy.autoPrune' component={AutoPruneFormField} />
                                             </div>
                                             <div className='argo-form-row'>
                                                 <FormField formApi={api} field='metadata.finalizers' component={SetFinalizerOnApplication} />

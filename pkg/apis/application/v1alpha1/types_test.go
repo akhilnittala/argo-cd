@@ -3693,6 +3693,30 @@ func TestSyncPolicy_IsZero(t *testing.T) {
 	assert.False(t, (&SyncPolicy{Automated: &SyncPolicyAutomated{}}).IsZero())
 	assert.False(t, (&SyncPolicy{SyncOptions: SyncOptions{""}}).IsZero())
 	assert.False(t, (&SyncPolicy{Retry: &RetryStrategy{}}).IsZero())
+	assert.False(t, (&SyncPolicy{AutoPrune: new(true)}).IsZero())
+}
+
+func TestSyncPolicy_GetAutoPrune(t *testing.T) {
+	var nilPolicy *SyncPolicy
+	assert.False(t, nilPolicy.GetAutoPrune())
+	assert.False(t, (&SyncPolicy{}).GetAutoPrune())
+	assert.False(t, (&SyncPolicy{AutoPrune: new(false)}).GetAutoPrune())
+	assert.True(t, (&SyncPolicy{AutoPrune: new(true)}).GetAutoPrune())
+
+	// Deprecated automated.prune takes precedence when explicitly set.
+	assert.False(t, (&SyncPolicy{
+		AutoPrune: new(true),
+		Automated: &SyncPolicyAutomated{Prune: new(false)},
+	}).GetAutoPrune())
+	assert.True(t, (&SyncPolicy{
+		AutoPrune: new(false),
+		Automated: &SyncPolicyAutomated{Prune: new(true)},
+	}).GetAutoPrune())
+	// Unset automated.prune falls through to autoPrune.
+	assert.True(t, (&SyncPolicy{
+		AutoPrune: new(true),
+		Automated: &SyncPolicyAutomated{},
+	}).GetAutoPrune())
 }
 
 func TestSyncOptions_HasOption(t *testing.T) {

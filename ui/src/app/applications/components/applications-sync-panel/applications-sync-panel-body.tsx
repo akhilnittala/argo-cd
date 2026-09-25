@@ -55,7 +55,8 @@ export const ApplicationsSyncPanelBody = ({apps, getApi, setPending}: {apps: mod
                                     app.metadata.name,
                                     app.metadata.namespace,
                                     getAppDefaultSource(app).targetRevision,
-                                    syncFlags.Prune || false,
+                                    // When Prune is unchecked, omit it so each app can use syncPolicy.autoPrune.
+                                    syncFlags.Prune ? true : undefined,
                                     syncFlags.DryRun || false,
                                     syncStrategy,
                                     null,

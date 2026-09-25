@@ -281,19 +281,16 @@ func Test_setAppSpecOptions(t *testing.T) {
 	t.Run("AutoPruneFlag", func(t *testing.T) {
 		f := newAppOptionsFixture()
 
-		// syncPolicy is nil (automated.enabled = false)
 		require.NoError(t, f.SetFlag("auto-prune", "true"))
-		require.NotNil(t, f.spec.SyncPolicy.Automated.Enabled)
-		assert.False(t, *f.spec.SyncPolicy.Automated.Enabled)
-		require.NotNil(t, f.spec.SyncPolicy.Automated.Prune)
-		assert.True(t, *f.spec.SyncPolicy.Automated.Prune)
+		require.NotNil(t, f.spec.SyncPolicy)
+		require.NotNil(t, f.spec.SyncPolicy.AutoPrune)
+		assert.True(t, *f.spec.SyncPolicy.AutoPrune)
+		assert.Nil(t, f.spec.SyncPolicy.Automated)
 
-		// automated.enabled = true
-		*f.spec.SyncPolicy.Automated.Enabled = true
 		require.NoError(t, f.SetFlag("auto-prune", "false"))
-		assert.True(t, *f.spec.SyncPolicy.Automated.Enabled)
-		require.NotNil(t, f.spec.SyncPolicy.Automated.Prune)
-		assert.False(t, *f.spec.SyncPolicy.Automated.Prune)
+		require.NotNil(t, f.spec.SyncPolicy.AutoPrune)
+		assert.False(t, *f.spec.SyncPolicy.AutoPrune)
+		assert.Nil(t, f.spec.SyncPolicy.Automated)
 	})
 	t.Run("SelfHealFlag", func(t *testing.T) {
 		f := newAppOptionsFixture()

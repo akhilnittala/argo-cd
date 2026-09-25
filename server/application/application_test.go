@@ -2472,6 +2472,78 @@ func TestSyncMultiSource_PosTooSmall(t *testing.T) {
 		"should fail because source position is less than 1")
 }
 
+func TestSync_UsesSyncPolicyAutoPruneDefault(t *testing.T) {
+	ctx := t.Context()
+	//nolint:staticcheck
+	ctx = context.WithValue(ctx, "claims", &jwt.RegisteredClaims{Subject: "admin"})
+	appServer := newTestAppServer(t)
+
+	testApp := newTestApp()
+	testApp.Name = "test-app-sync-auto-prune-default"
+	testApp.Spec.SyncPolicy = &v1alpha1.SyncPolicy{AutoPrune: new(true)}
+	app, err := appServer.Create(ctx, &application.ApplicationCreateRequest{Application: testApp})
+	require.NoError(t, err)
+
+	syncedApp, err := appServer.Sync(ctx, &application.ApplicationSyncRequest{Name: &app.Name})
+	require.NoError(t, err)
+	require.NotNil(t, syncedApp.Operation)
+	require.NotNil(t, syncedApp.Operation.Sync)
+	assert.True(t, syncedApp.Operation.Sync.Prune, "nil sync request prune should use syncPolicy.autoPrune")
+
+	// Clear in-progress operation so a second sync can be initiated.
+	syncedApp.Operation = nil
+	syncedApp.Status.OperationState = nil
+	_, err = appServer.appclientset.ArgoprojV1alpha1().Applications(syncedApp.Namespace).Update(ctx, syncedApp, metav1.UpdateOptions{})
+	require.NoError(t, err)
+
+	explicitFalse := false
+	syncedApp, err = appServer.Sync(ctx, &application.ApplicationSyncRequest{Name: &app.Name, Prune: &explicitFalse})
+	require.NoError(t, err)
+	require.NotNil(t, syncedApp.Operation)
+	require.NotNil(t, syncedApp.Operation.Sync)
+	assert.False(t, syncedApp.Operation.Sync.Prune, "explicit prune=false should override syncPolicy.autoPrune")
+}
+
+func TestSync_PruneDefaultsFalseWithoutAutoPrune(t *testing.T) {
+	ctx := t.Context()
+	//nolint:staticcheck
+	ctx = context.WithValue(ctx, "claims", &jwt.RegisteredClaims{Subject: "admin"})
+	appServer := newTestAppServer(t)
+
+	testApp := newTestApp()
+	testApp.Name = "test-app-sync-auto-prune-unset"
+	app, err := appServer.Create(ctx, &application.ApplicationCreateRequest{Application: testApp})
+	require.NoError(t, err)
+
+	syncedApp, err := appServer.Sync(ctx, &application.ApplicationSyncRequest{Name: &app.Name})
+	require.NoError(t, err)
+	require.NotNil(t, syncedApp.Operation)
+	require.NotNil(t, syncedApp.Operation.Sync)
+	assert.False(t, syncedApp.Operation.Sync.Prune, "nil sync request prune without syncPolicy.autoPrune should not prune")
+}
+
+func TestSync_DeprecatedAutomatedPruneTakesPrecedence(t *testing.T) {
+	ctx := t.Context()
+	//nolint:staticcheck
+	ctx = context.WithValue(ctx, "claims", &jwt.RegisteredClaims{Subject: "admin"})
+	appServer := newTestAppServer(t)
+
+	testApp := newTestApp()
+	testApp.Name = "test-app-sync-deprecated-prune"
+	testApp.Spec.SyncPolicy = &v1alpha1.SyncPolicy{
+		AutoPrune: new(true),
+		Automated: &v1alpha1.SyncPolicyAutomated{Prune: new(false), Enabled: new(false)},
+	}
+	app, err := appServer.Create(ctx, &application.ApplicationCreateRequest{Application: testApp})
+	require.NoError(t, err)
+
+	syncedApp, err := appServer.Sync(ctx, &application.ApplicationSyncRequest{Name: &app.Name})
+	require.NoError(t, err)
+	require.NotNil(t, syncedApp.Operation)
+	require.NotNil(t, syncedApp.Operation.Sync)
+	assert.False(t, syncedApp.Operation.Sync.Prune, "deprecated automated.prune should take precedence over autoPrune")
+}
+
 func TestSync_SyncWithoutSyncPermissionShouldFail(t *testing.T) {
 	ctx := t.Context()
 	//nolint:staticcheck

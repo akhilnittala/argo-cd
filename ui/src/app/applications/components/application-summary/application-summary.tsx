@@ -575,10 +575,13 @@ export const ApplicationSummary = (props: ApplicationSummaryProps) => {
                     }
                     const existingAutomated = updatedApp.spec.syncPolicy.automated;
                     updatedApp.spec.syncPolicy.automated = {
-                        prune: existingAutomated?.prune ?? false,
                         selfHeal: existingAutomated?.selfHeal ?? false,
                         enabled: !isEnabled
                     };
+                    // Clear deprecated automated.prune when toggling; autoPrune is the source of truth.
+                    if (updatedApp.spec.syncPolicy.automated) {
+                        delete updatedApp.spec.syncPolicy.automated.prune;
+                    }
                     await updateApp(updatedApp, {validate: false});
                 } else {
                     await services.applications.runResourceAction(
@@ -606,8 +609,13 @@ export const ApplicationSummary = (props: ApplicationSummaryProps) => {
         }
     }
 
-    // Handler for the PRUNE RESOURCES and SELF HEAL checkboxes only; auto-sync toggling lives in `toggleAutoSync` above.
-    async function setAutoSync(ctx: ContextApis, confirmationTitle: string, confirmationText: string, prune: boolean, selfHeal: boolean, enable: boolean) {
+    // Handler for the SELF HEAL checkbox; auto-sync toggling lives in `toggleAutoSync` above.
+    async function setSelfHeal(ctx: ContextApis, selfHeal: boolean) {
+        const automated = app.spec.syncPolicy?.automated || {selfHeal: false, enabled: false};
+        const confirmationTitle = selfHeal ? 'Enable Self Heal?' : 'Disable Self Heal?';
+        const confirmationText = selfHeal
+            ? 'If checked, application will automatically sync when changes are detected'
+            : 'If unchecked, application will not automatically sync when changes are detected';
         const confirmed = await ctx.popup.confirm(confirmationTitle, confirmationText);
         if (confirmed) {
             try {
@@ -616,12 +624,46 @@ export const ApplicationSummary = (props: ApplicationSummaryProps) => {
                 if (!updatedApp.spec.syncPolicy) {
                     updatedApp.spec.syncPolicy = {};
                 }
-
-                updatedApp.spec.syncPolicy.automated = {prune, selfHeal, enabled: enable};
+                updatedApp.spec.syncPolicy.automated = {
+                    selfHeal,
+                    enabled: automated.enabled
+                };
+                delete updatedApp.spec.syncPolicy.automated.prune;
                 await updateApp(updatedApp, {validate: false});
             } catch (e) {
                 ctx.notifications.show({
                     content: <ErrorNotification title={`Unable to "${confirmationTitle.replace(/\?/g, '')}"`} e={e} />,
+                    type: NotificationType.Error
+                });
+            } finally {
+                setChangeSync(false);
+            }
+        }
+    }
+
+    async function setAutoPrune(ctx: ContextApis, autoPrune: boolean) {
+        const confirmed = await ctx.popup.confirm(
+            autoPrune ? 'Enable Prune Resources?' : 'Disable Prune Resources?',
+            autoPrune
+                ? 'Are you sure you want to enable resource pruning during manual and automated syncs?'
+                : 'Are you sure you want to disable resource pruning during syncs?'
+        );
+        if (confirmed) {
+            try {
+                setChangeSync(true);
+                const updatedApp = JSON.parse(JSON.stringify(props.app)) as models.Application;
+                if (!updatedApp.spec.syncPolicy) {
+                    updatedApp.spec.syncPolicy = {};
+                }
+                updatedApp.spec.syncPolicy.autoPrune = autoPrune ? true : undefined;
+                // Clear deprecated automated.prune so autoPrune is the source of truth.
+                if (updatedApp.spec.syncPolicy.automated) {
+                    delete updatedApp.spec.syncPolicy.automated.prune;
+                }
+                await updateApp(updatedApp, {validate: false});
+            } catch (e) {
+                ctx.notifications.show({
+                    content: <ErrorNotification title='Unable to update auto prune' e={e} />,
                     type: NotificationType.Error
                 });
             } finally {
@@ -755,48 +797,29 @@ export const ApplicationSummary = (props: ApplicationSummaryProps) => {
                                     </div>
                                 </div>
                             </div>
+                            <div className='row white-box__details-row'>
+                                <div className='columns small-12'>
+                                    <div className='checkbox-container'>
+                                        <Checkbox
+                                            onChange={async (autoPrune: boolean) => {
+                                                await setAutoPrune(ctx, autoPrune);
+                                            }}
+                                            checked={models.isAutoPruneEnabled(app.spec.syncPolicy)}
+                                            id='auto-prune'
+                                        />
+                                        <label htmlFor='auto-prune'>PRUNE RESOURCES</label>
+                                        <HelpIcon title='If checked, Argo will delete resources if they are no longer defined in Git during manual and automated syncs' />
+                                    </div>
+                                </div>
+                            </div>
                             {app.spec.syncPolicy && app.spec.syncPolicy.automated && (
                                 <React.Fragment>
                                     <div className='row white-box__details-row'>
                                         <div className='columns small-12'>
                                             <div className='checkbox-container'>
                                                 <Checkbox
-                                                    onChange={async (prune: boolean) => {
-                                                        const automated = app.spec.syncPolicy?.automated || {selfHeal: false, enabled: false};
-                                                        setAutoSync(
-                                                            ctx,
-                                                            prune ? 'Enable Prune Resources?' : 'Disable Prune Resources?',
-                                                            prune
-                                                                ? 'Are you sure you want to enable resource pruning during automated application synchronization?'
-                                                                : 'Are you sure you want to disable resource pruning during automated application synchronization?',
-                                                            prune,
-                                                            automated.selfHeal,
-                                                            automated.enabled
-                                                        );
-                                                    }}
-                                                    checked={!!app.spec.syncPolicy?.automated?.prune}
-                                                    id='prune-resources'
-                                                />
-                                                <label htmlFor='prune-resources'>PRUNE RESOURCES</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className='row white-box__details-row'>
-                                        <div className='columns small-12'>
-                                            <div className='checkbox-container'>
-                                                <Checkbox
                                                     onChange={async (selfHeal: boolean) => {
-                                                        const automated = app.spec.syncPolicy?.automated || {prune: false, enabled: false};
-                                                        setAutoSync(
-                                                            ctx,
-                                                            selfHeal ? 'Enable Self Heal?' : 'Disable Self Heal?',
-                                                            selfHeal
-                                                                ? 'If checked, application will automatically sync when changes are detected'
-                                                                : 'If unchecked, application will not automatically sync when changes are detected',
-                                                            automated.prune,
-                                                            selfHeal,
-                                                            automated.enabled
-                                                        );
+                                                        await setSelfHeal(ctx, selfHeal);
                                                     }}
                                                     checked={!!app.spec.syncPolicy?.automated?.selfHeal}
                                                     id='self-heal'

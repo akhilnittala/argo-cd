@@ -2303,6 +2303,14 @@ spec:
               syncPolicy:
                 description: SyncPolicy controls when and how a sync will be performed
                 properties:
+                  autoPrune:
+                    description: 'AutoPrune specifies whether to delete resources from
+                      the cluster that are not found in the sources anymore during
+                      sync. Applies to both manual and automated syncs (default: false).
+                      Prefer this over the deprecated syncPolicy.automated.prune field.
+                      When automated.prune is explicitly set, it still takes precedence
+                      for backwards compatibility.'
+                    type: boolean
                   automated:
                     description: Automated will keep an application synced to the
                       target revision
@@ -2316,9 +2324,11 @@ spec:
                           sync
                         type: boolean
                       prune:
-                        description: 'Prune specifies whether to delete resources
-                          from the cluster that are not found in the sources anymore
-                          as part of automated sync (default: false)'
+                        description: 'Deprecated: use syncPolicy.autoPrune instead.
+                          Prune specifies whether to delete resources from the cluster
+                          that are not found in the sources anymore as part of automated
+                          sync (default: false). When explicitly set, this field takes
+                          precedence over syncPolicy.autoPrune.'
                         type: boolean
                       selfHeal:
                         description: 'SelfHeal specifies whether to revert resources
@@ -8174,6 +8184,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -9094,6 +9107,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -10015,6 +10031,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -10914,6 +10933,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -11838,6 +11860,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -12758,6 +12783,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -13679,6 +13707,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -14578,6 +14609,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -15499,6 +15533,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -16409,6 +16446,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -17543,6 +17583,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -18674,6 +18717,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -19590,6 +19636,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -20516,6 +20565,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -21436,6 +21488,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -22357,6 +22412,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -23256,6 +23314,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -24177,6 +24238,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -25087,6 +25151,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -26221,6 +26288,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -27352,6 +27422,9 @@ spec:
                                                 items:
                                                   type: string
                                                 type: array
+                                              autoPrune:
+                                                description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                                type: boolean
                                             type: object
                                         required:
                                         - destination
@@ -28272,6 +28345,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -29192,6 +29268,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -30102,6 +30181,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -31236,6 +31318,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination
@@ -32367,6 +32452,9 @@ spec:
                                       items:
                                         type: string
                                       type: array
+                                    autoPrune:
+                                      description: 'AutoPrune specifies whether to delete resources from the cluster that are not found in the sources anymore during sync. Applies to both manual and automated syncs (default: false). Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is explicitly set, it still takes precedence for backwards compatibility.'
+                                      type: boolean
                                   type: object
                               required:
                               - destination

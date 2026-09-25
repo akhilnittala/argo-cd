@@ -2659,7 +2659,7 @@ func (ctrl *ApplicationController) autoSync(ctx context.Context, app *appv1.Appl
 		return nil, 0
 	}
 
-	if !app.Spec.SyncPolicy.Automated.GetPrune() {
+	if !app.Spec.SyncPolicy.GetAutoPrune() {
 		requirePruneOnly := true
 		for _, r := range resources {
 			if r.Status != appv1.SyncStatusCodeSynced && !r.RequiresPruning {
@@ -2684,7 +2684,7 @@ func (ctrl *ApplicationController) autoSync(ctx context.Context, app *appv1.Appl
 		Sync: &appv1.SyncOperation{
 			Source:      source,
 			Revision:    syncStatus.Revision,
-			Prune:       app.Spec.SyncPolicy.Automated.GetPrune(),
+			Prune:       app.Spec.SyncPolicy.GetAutoPrune(),
 			SyncOptions: app.Spec.SyncPolicy.SyncOptions,
 			Sources:     app.Spec.Sources,
 			Revisions:   syncStatus.Revisions,
@@ -2738,7 +2738,7 @@ func (ctrl *ApplicationController) autoSync(ctx context.Context, app *appv1.Appl
 	}
 	ts.AddCheckpoint("already_attempted_check_ms")
 
-	if app.Spec.SyncPolicy.Automated.GetPrune() && !app.Spec.SyncPolicy.Automated.GetAllowEmpty() {
+	if app.Spec.SyncPolicy.GetAutoPrune() && !app.Spec.SyncPolicy.Automated.GetAllowEmpty() {
 		bAllNeedPrune := true
 		for _, r := range resources {
 			if !r.RequiresPruning {

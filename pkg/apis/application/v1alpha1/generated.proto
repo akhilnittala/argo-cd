@@ -2894,11 +2894,19 @@ message SyncPolicy {
 
   // ManagedNamespaceMetadata controls metadata in the given namespace (if CreateNamespace=true)
   optional ManagedNamespaceMetadata managedNamespaceMetadata = 4;
+
+  // AutoPrune specifies whether to delete resources from the cluster that are not found in the
+  // sources anymore during sync. Applies to both manual and automated syncs default is false.
+  // Prefer this over the deprecated syncPolicy.automated.prune field. When automated.prune is
+  // explicitly set, it still takes precedence for backwards compatibility.
+  optional bool autoPrune = 5;
 }
 
 // SyncPolicyAutomated controls the behavior of an automated sync
 message SyncPolicyAutomated {
-  // Prune specifies whether to delete resources from the cluster that are not found in the sources anymore as part of automated sync (default: false)
+  // Deprecated: use syncPolicy.autoPrune instead. Prune specifies whether to delete resources
+  // from the cluster that are not found in the sources anymore as part of automated sync
+  // (default: false). When explicitly set, this field takes precedence over syncPolicy.autoPrune.
   optional bool prune = 1;
 
   // SelfHeal specifies whether to revert resources back to their desired state upon modification in the cluster (default: false)

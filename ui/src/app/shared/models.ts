@@ -333,7 +333,8 @@ export interface ApplicationSourceDirectory {
 }
 
 export interface Automated {
-    prune: boolean;
+    // Deprecated: use syncPolicy.autoPrune instead. Still honored for backwards compatibility.
+    prune?: boolean;
     selfHeal: boolean;
     enabled: boolean;
 }
@@ -342,6 +343,16 @@ export interface SyncPolicy {
     automated?: Automated;
     syncOptions?: string[];
     retry?: RetryStrategy;
+    // When true, syncs (manual and automated) prune by default unless the sync request overrides it.
+    autoPrune?: boolean;
+}
+
+/** Effective prune setting: deprecated automated.prune takes precedence over autoPrune. */
+export function isAutoPruneEnabled(syncPolicy?: SyncPolicy): boolean {
+    if (syncPolicy?.automated?.prune != null) {
+        return !!syncPolicy.automated.prune;
+    }
+    return !!syncPolicy?.autoPrune;
 }
 
 export interface Info {
