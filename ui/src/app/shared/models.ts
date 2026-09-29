@@ -343,16 +343,17 @@ export interface SyncPolicy {
     automated?: Automated;
     syncOptions?: string[];
     retry?: RetryStrategy;
-    // When true, syncs (manual and automated) prune by default unless the sync request overrides it.
+    // When true, manual syncs prune resources by default unless the sync request overrides it.
     autoPrune?: boolean;
 }
 
-/** Effective prune setting: deprecated automated.prune takes precedence over autoPrune. */
+/** Whether manual syncs should prune by default. */
 export function isAutoPruneEnabled(syncPolicy?: SyncPolicy): boolean {
-    if (syncPolicy?.automated?.prune != null) {
-        return !!syncPolicy.automated.prune;
-    }
     return !!syncPolicy?.autoPrune;
+}
+
+export function isAutomatedPruneEnabled(syncPolicy?: SyncPolicy): boolean {
+    return !!syncPolicy?.automated?.prune;
 }
 
 export interface Info {
