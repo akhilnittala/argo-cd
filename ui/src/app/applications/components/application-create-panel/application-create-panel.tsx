@@ -39,15 +39,7 @@ const DEFAULT_APP: Partial<models.Application> = {
             targetRevision: 'HEAD'
         },
         sources: [],
-        project: '',
-        syncPolicy: {
-            manualDefaults: {
-                prune: true,
-                dryRun: false,
-                applyOnly: false,
-                force: false
-            }
-        }
+        project: ''
     }
 };
 
@@ -88,39 +80,6 @@ const AutoSyncFormField = ReactFormField((props: {fieldApi: FieldApi; className:
                 </div>
             )}
         </React.Fragment>
-    );
-});
-
-const ManualSyncDefaultsFormField = ReactFormField((props: {fieldApi: FieldApi}) => {
-    const {
-        fieldApi: {getValue, setValue}
-    } = props;
-    const manualDefaults = (getValue() || {}) as models.ManualDefaults;
-    const update = (patch: Partial<models.ManualDefaults>) => setValue({...manualDefaults, ...patch});
-
-    return (
-        <div className='application-create-panel__sync-params'>
-            <div className='checkbox-container'>
-                <Checkbox onChange={val => update({prune: val})} checked={manualDefaults.prune ?? true} id='policyManualPrune' />
-                <label htmlFor='policyManualPrune'>Prune on Manual Sync</label>
-                <HelpIcon title='Default prune for manual syncs (default: true)' />
-            </div>
-            <div className='checkbox-container'>
-                <Checkbox onChange={val => update({dryRun: val})} checked={!!manualDefaults.dryRun} id='policyManualDryRun' />
-                <label htmlFor='policyManualDryRun'>Dry Run on Manual Sync</label>
-                <HelpIcon title='Default dry-run for manual syncs (default: false)' />
-            </div>
-            <div className='checkbox-container'>
-                <Checkbox onChange={val => update({applyOnly: val})} checked={!!manualDefaults.applyOnly} id='policyManualApplyOnly' />
-                <label htmlFor='policyManualApplyOnly'>Apply Only on Manual Sync</label>
-                <HelpIcon title='Default apply-only strategy for manual syncs (default: false)' />
-            </div>
-            <div className='checkbox-container'>
-                <Checkbox onChange={val => update({force: val})} checked={!!manualDefaults.force} id='policyManualForce' />
-                <label htmlFor='policyManualForce'>Force on Manual Sync</label>
-                <HelpIcon title='Default force for manual syncs (default: false)' />
-            </div>
-        </div>
     );
 });
 
@@ -386,7 +345,6 @@ export const ApplicationCreatePanel = (props: {
                                                     qeId='application-create-field-sync-policy'
                                                     component={AutoSyncFormField}
                                                 />
-                                                <FormField formApi={api} field='spec.syncPolicy.manualDefaults' component={ManualSyncDefaultsFormField} />
                                             </div>
                                             <div className='argo-form-row'>
                                                 <FormField formApi={api} field='metadata.finalizers' component={SetFinalizerOnApplication} />
