@@ -319,7 +319,7 @@ export class ApplicationsService {
         syncOptions?: string[],
         retryStrategy?: models.RetryStrategy
     ): Promise<boolean> {
-        // Omit prune when undefined so the API can apply syncPolicy.prune as the default.
+        // Omit prune when undefined so the API can apply syncPolicy.manualDefaults.prune as the default.
         const body: Record<string, unknown> = {
             appNamespace,
             revision,
